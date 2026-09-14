@@ -1,0 +1,6 @@
+{
+  "name": "Campus Notice Clarifier",
+  "description": "AI-powered assistant turning scattered, cryptic college announcements and circulars into clear, actionable updates and step-by-step checklists for freshers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
