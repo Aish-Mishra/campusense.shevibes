@@ -1,1 +1,49 @@
 @import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-serif: 'Newsreader', Georgia, Cambria, serif;
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: #faf6f7;
+    color: #2b1a23;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+}
+
+.font-serif-heading {
+  font-family: 'Newsreader', Georgia, serif;
+}
+
+.font-mono-code {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* Subtle tactile paper shadow */
+.shadow-paper {
+  box-shadow: 0 1px 2px 0 rgba(140, 36, 68, 0.04), 0 2px 8px -1px rgba(140, 36, 68, 0.06);
+}
+
+.shadow-paper-hover:hover {
+  box-shadow: 0 4px 14px -2px rgba(140, 36, 68, 0.08), 0 1px 3px 0 rgba(140, 36, 68, 0.04);
+}
+
+.shadow-button-press {
+  box-shadow: 0 2px 0 0 #8c2444;
+}
+
+.shadow-button-press:active {
+  box-shadow: 0 0 0 0 #8c2444;
+  transform: translateY(1px);
+}
+
+/* Faint lined paper texture accent */
+.bg-grid-blush {
+  background-image: radial-gradient(#eecad4 0.75px, transparent 0.75px);
+  background-size: 16px 16px;
+}

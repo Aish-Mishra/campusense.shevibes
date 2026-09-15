@@ -187,7 +187,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-pink-200">
+    <div className="min-h-screen bg-[#faf6f7] text-[#26141c] flex flex-col selection:bg-[#fcedf1] selection:text-[#8c2444]">
       {/* Top Navigation */}
       <Navigation
         currentPage={currentPage}
@@ -201,8 +201,8 @@ export default function App() {
         totalNoticesCount={notices.length}
       />
 
-      {/* Main Spacious Content Canvas */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      {/* Main Content Canvas */}
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-8 py-6 sm:py-9">
         {currentPage === 'simplify' && (
           <SimplifyView
             inputText={inputText}
@@ -242,15 +242,58 @@ export default function App() {
         )}
       </main>
 
-      {/* Spacious, uncrowded footer */}
-      <footer className="border-t border-pink-200 bg-pink-50/50 py-6 mt-12 text-center text-xs text-slate-500">
-        <div className="max-w-6xl mx-auto px-4 space-y-1">
-          <p className="font-semibold text-slate-700">
-            CampuSense • College Announcement Copilot
-          </p>
-          <p>
-            Demystifying university notices, document checklists, and campus jargon for freshers.
-          </p>
+      {/* Editorial Campus Footer */}
+      <footer className="border-t border-[#ebd2db] bg-[#fffbfc] py-8 text-xs text-[#735360]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="space-y-1 text-center sm:text-left">
+            <div className="flex items-center justify-center sm:justify-start gap-2">
+              <span className="font-serif-heading font-bold text-sm text-[#26141c]">
+                CampuSense
+              </span>
+              <span className="text-[#ebd0d8]">•</span>
+              <span className="font-mono text-[10px] text-[#8c3b53] uppercase tracking-wider">
+                Fresher Bulletin & Circular Dossier
+              </span>
+            </div>
+            <p className="text-[11px] text-[#8c6b78] max-w-lg">
+              Independent student-to-student notice decoder. Always verify physical certificate requirements at your college admin block window before deadline cutoffs.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-4 text-[11px] font-medium text-[#8c2444]">
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentPage('board');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="hover:underline cursor-pointer"
+            >
+              Notice Board
+            </button>
+            <span className="text-[#ecd6dd]">•</span>
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentPage('glossary');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="hover:underline cursor-pointer"
+            >
+              Lexicon
+            </button>
+            <span className="text-[#ecd6dd]">•</span>
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentPage('profile');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="hover:underline cursor-pointer"
+            >
+              Student Card
+            </button>
+          </div>
         </div>
       </footer>
     </div>

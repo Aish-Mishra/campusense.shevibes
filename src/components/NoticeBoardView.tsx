@@ -9,8 +9,12 @@ import {
   CheckCircle2,
   FileText,
   Filter,
+  Pin,
+  MapPin,
+  ChevronRight,
+  ShieldAlert,
 } from 'lucide-react';
-import { ClarifiedNotice, NoticeCategory } from '../types';
+import { ClarifiedNotice } from '../types';
 
 interface NoticeBoardViewProps {
   notices: ClarifiedNotice[];
@@ -19,12 +23,11 @@ interface NoticeBoardViewProps {
 }
 
 const CATEGORIES: { id: string; label: string }[] = [
-  { id: 'all', label: 'All Notices' },
-  { id: 'academic', label: 'Academic & Documents' },
-  { id: 'exams', label: 'Exams & Attendance' },
-  { id: 'hostel', label: 'Hostel & Mess' },
-  { id: 'library', label: 'Library' },
-  { id: 'scholarships', label: 'Scholarships' },
+  { id: 'all', label: 'All Dispatches' },
+  { id: 'academic', label: 'Academic & Certificates' },
+  { id: 'exams', label: 'Attendance & Exams' },
+  { id: 'hostel', label: 'Hostel & Wardens' },
+  { id: 'scholarships', label: 'Scholarships & Fees' },
 ];
 
 export const NoticeBoardView: React.FC<NoticeBoardViewProps> = ({
@@ -47,45 +50,109 @@ export const NoticeBoardView: React.FC<NoticeBoardViewProps> = ({
     return matchesCat && matchesSearch;
   });
 
+  // Find most urgent notice for top pin
+  const pinnedNotice = notices.find((n) => n.urgency === 'CRITICAL');
+
   return (
-    <div className="max-w-5xl mx-auto space-y-8 py-4">
-      {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-8 pb-12">
+      {/* Top Editorial Board Header */}
+      <div className="border-b border-[#ebd2db] pb-5 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
-            Campus Notice Board
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#b8325a]" />
+            <span className="font-mono text-[11px] uppercase tracking-widest text-[#8c3b53] font-semibold">
+              Official Campus Bulletin
+            </span>
+          </div>
+          <h1 className="font-serif-heading text-2xl sm:text-3xl lg:text-4xl font-bold text-[#26141c]">
+            The Notice Board
           </h1>
-          <p className="text-sm text-slate-600 mt-1">
-            Browse all decoded campus circulars and track your pending requirements.
+          <p className="text-sm text-[#6e505d] mt-1.5 max-w-xl">
+            Active circulars, departmental warnings, and deadlines decoded into step-by-step checklists.
           </p>
         </div>
 
         <button
           type="button"
           onClick={onNewNotice}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-pink-600 hover:bg-pink-700 text-white text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer self-start sm:self-auto"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#b8325a] hover:bg-[#a12448] active:bg-[#871939] text-white text-xs sm:text-sm font-semibold shadow-button-press transition-all cursor-pointer self-start sm:self-auto"
         >
-          <Sparkles className="w-4 h-4" />
-          <span>Simplify New Notice</span>
+          <Sparkles className="w-4 h-4 text-rose-200" />
+          <span>Decode Any Notice</span>
         </button>
       </div>
 
-      {/* Filter & Search Bar - Pink Box */}
-      <div className="bg-pink-50 rounded-2xl border border-pink-200 p-5 sm:p-6 space-y-4 shadow-sm">
+      {/* Pinned Urgent Dispatch (If any) */}
+      {pinnedNotice && selectedCategory === 'all' && !searchQuery && (
+        <div
+          onClick={() => onSelectNotice(pinnedNotice)}
+          className="bg-gradient-to-r from-[#fff4f6] via-[#fff8f9] to-[#fff4f6] border-2 border-[#f0cbd6] rounded-xl p-5 shadow-paper cursor-pointer hover:border-[#b8325a] transition-all group"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-[#f3dbe2]">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-wider bg-[#8c1d38] text-white px-2 py-0.5 rounded">
+                <Pin className="w-3 h-3 rotate-45" />
+                <span>Pinned Urgent Notice</span>
+              </span>
+              <span className="text-xs font-semibold text-[#8c2444]">
+                {pinnedNotice.department}
+              </span>
+            </div>
+
+            {pinnedNotice.deadline && (
+              <span className="text-xs font-mono font-bold text-[#8c1d38] flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-[#b8325a]" />
+                <span>Cutoff: {pinnedNotice.deadline}</span>
+              </span>
+            )}
+          </div>
+
+          <div className="pt-3 space-y-2">
+            <h2 className="font-serif-heading text-lg sm:text-xl font-bold text-[#24131a] group-hover:text-[#8c2444] transition-colors">
+              {pinnedNotice.title}
+            </h2>
+            <p className="text-xs sm:text-sm text-[#614552] leading-relaxed line-clamp-2">
+              {pinnedNotice.tldr}
+            </p>
+          </div>
+
+          <div className="mt-3 pt-3 border-t border-[#f3dbe2] flex items-center justify-between text-xs">
+            <div className="flex items-center gap-4 text-[#755562]">
+              {pinnedNotice.contactOrOffice && (
+                <span className="flex items-center gap-1 font-medium">
+                  <MapPin className="w-3.5 h-3.5 text-[#b8325a]" />
+                  <span>{pinnedNotice.contactOrOffice}</span>
+                </span>
+              )}
+              <span className="font-mono text-[11px]">
+                {(pinnedNotice.userCompletedSteps || []).length}/{pinnedNotice.actionSteps.length} steps checked
+              </span>
+            </div>
+
+            <span className="font-semibold text-[#8c2444] flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+              <span>Open Full Dossier</span>
+              <ChevronRight className="w-4 h-4" />
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Filter and Search Bar */}
+      <div className="bg-white rounded-xl border border-[#ebd2dc] p-4 shadow-paper space-y-3">
         {/* Search input */}
         <div className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#967583] absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search circulars by keyword, department, or document name..."
-            className="w-full bg-white border border-pink-200 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-pink-500"
+            placeholder="Search circulars by keyword, room number, or required certificate..."
+            className="w-full bg-[#fdf8fa] border border-[#ecd5de] rounded-lg pl-10 pr-4 py-2 text-xs sm:text-sm text-[#26141c] placeholder:text-[#997987] focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#b8325a] focus:border-[#b8325a]"
           />
         </div>
 
         {/* Category Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pt-0.5">
           {CATEGORIES.map((cat) => {
             const isSelected = selectedCategory === cat.id;
             return (
@@ -93,10 +160,10 @@ export const NoticeBoardView: React.FC<NoticeBoardViewProps> = ({
                 key={cat.id}
                 type="button"
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`text-xs font-semibold px-3.5 py-1.5 rounded-xl border transition-all whitespace-nowrap cursor-pointer ${
+                className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all whitespace-nowrap cursor-pointer ${
                   isSelected
-                    ? 'bg-pink-600 text-white border-pink-600 shadow-2xs'
-                    : 'bg-white text-slate-700 border-pink-200 hover:bg-pink-100/60'
+                    ? 'bg-[#8c2444] text-white border-[#8c2444] shadow-button-press'
+                    : 'bg-[#fcf5f7] text-[#634854] border-[#ebd4dc] hover:bg-[#faebf0] hover:text-[#26141c]'
                 }`}
               >
                 {cat.label}
@@ -106,13 +173,13 @@ export const NoticeBoardView: React.FC<NoticeBoardViewProps> = ({
         </div>
       </div>
 
-      {/* Notices Grid with generous breathing space */}
+      {/* Notices Grid */}
       {filteredNotices.length === 0 ? (
-        <div className="bg-pink-50 rounded-2xl border border-pink-200 p-12 text-center space-y-3">
-          <FileText className="w-10 h-10 text-pink-400 mx-auto" />
-          <h3 className="text-base font-bold text-slate-800">No circulars found</h3>
-          <p className="text-xs text-slate-600 max-w-sm mx-auto">
-            No notices match your current search or category filter. Try clearing filters or paste a new circular.
+        <div className="bg-white rounded-xl border border-dashed border-[#e6c7d2] p-12 text-center space-y-3">
+          <FileText className="w-10 h-10 text-[#d49faa] mx-auto" />
+          <h3 className="font-serif-heading text-lg font-bold text-[#26141c]">No circulars matched</h3>
+          <p className="text-xs text-[#6e505d] max-w-sm mx-auto">
+            No notices match your current search query. Try clearing the filter or paste a new circular to decode it.
           </p>
           <button
             type="button"
@@ -120,88 +187,89 @@ export const NoticeBoardView: React.FC<NoticeBoardViewProps> = ({
               setSelectedCategory('all');
               setSearchQuery('');
             }}
-            className="text-xs text-pink-700 font-bold hover:underline cursor-pointer pt-1 inline-block"
+            className="text-xs text-[#8c2444] font-bold hover:underline cursor-pointer pt-1"
           >
-            Reset Filters
+            Clear all filters
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {filteredNotices.map((notice) => {
             const completedCount = (notice.userCompletedSteps || []).length;
             const totalCount = notice.actionSteps.length;
+            const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
             return (
               <div
                 key={notice.id}
                 onClick={() => onSelectNotice(notice)}
-                className="bg-pink-50 hover:bg-pink-100/60 border border-pink-200 hover:border-pink-300 rounded-2xl p-6 transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-4 shadow-sm group"
+                className="bg-white hover:bg-[#fffbfc] border border-[#ebd0d9] hover:border-[#b8325a] rounded-xl p-5 transition-all shadow-paper hover:shadow-paper-hover cursor-pointer flex flex-col justify-between space-y-4 group"
               >
                 <div className="space-y-3">
-                  {/* Meta badges */}
+                  {/* Top Reference & Badge Row */}
                   <div className="flex items-center justify-between gap-2">
-                    <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-pink-900 bg-pink-200/70 border border-pink-300 px-2.5 py-1 rounded-lg">
-                      <Building className="w-3 h-3 text-pink-700" />
-                      <span className="truncate max-w-[180px]">{notice.department}</span>
+                    <span className="font-mono text-[10px] text-[#8c4d61] bg-[#fcedf1] px-2 py-0.5 rounded border border-[#f2d3dc]">
+                      {notice.department}
                     </span>
 
                     {notice.urgency === 'CRITICAL' ? (
-                      <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-red-100 text-red-800 border border-red-200">
-                        Critical
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#fdf0f3] text-[#991d3c] border border-[#f7ccd7]">
+                        URGENT
                       </span>
                     ) : notice.urgency === 'IMPORTANT' ? (
-                      <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
-                        Important
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#fef6ea] text-[#945717] border border-[#fae2c0]">
+                        IMPORTANT
                       </span>
                     ) : (
-                      <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200">
-                        Notice
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#f2f7fc] text-[#1b5b94] border border-[#cfe2f5]">
+                        NOTICE
                       </span>
                     )}
                   </div>
 
                   {/* Title */}
-                  <h3 className="text-base font-bold text-slate-900 group-hover:text-pink-900 transition-colors line-clamp-2">
+                  <h3 className="font-serif-heading text-lg font-bold text-[#26141c] group-hover:text-[#8c2444] transition-colors leading-snug line-clamp-2">
                     {notice.title}
                   </h3>
 
-                  {/* TL;DR */}
-                  <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed">
+                  {/* Plain English TL;DR */}
+                  <p className="text-xs text-[#5c404d] line-clamp-3 leading-relaxed">
                     {notice.tldr}
                   </p>
                 </div>
 
-                {/* Footer details */}
-                <div className="pt-3 border-t border-pink-200/80 space-y-3">
-                  <div className="flex items-center justify-between text-xs text-slate-600">
-                    {notice.deadline ? (
-                      <span className="font-semibold text-pink-900 flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5 text-pink-700" />
-                        <span>{notice.deadline}</span>
+                {/* Bottom Stats & Action */}
+                <div className="pt-3 border-t border-[#f2dde4] space-y-2.5">
+                  {/* Progress bar */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-[#785966]">Progress Checklist</span>
+                      <span className="font-mono text-[11px] font-semibold text-[#8c2444]">
+                        {completedCount} of {totalCount} completed
                       </span>
-                    ) : (
-                      <span className="text-slate-400">No strict deadline</span>
-                    )}
-
-                    <span className="text-[11px] font-medium text-slate-500 flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-pink-600" />
-                      <span>
-                        {completedCount}/{totalCount} steps done
-                      </span>
-                    </span>
+                    </div>
+                    <div className="w-full bg-[#f5e4e8] h-1.5 rounded-full overflow-hidden">
+                      <div
+                        className="bg-[#b8325a] h-full transition-all duration-300 rounded-full"
+                        style={{ width: `${progressPercent}%` }}
+                      />
+                    </div>
                   </div>
 
                   <div className="flex items-center justify-between pt-1">
-                    <span className="text-xs font-bold text-pink-800 group-hover:text-pink-950 flex items-center gap-1">
-                      <span>View Action Checklist</span>
-                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                    </span>
-
-                    {notice.tags && notice.tags.length > 0 && (
-                      <span className="text-[10px] text-pink-700 bg-white border border-pink-200 px-2 py-0.5 rounded-md">
-                        #{notice.tags[0]}
+                    {notice.deadline ? (
+                      <span className="text-xs font-mono font-semibold text-[#8c2444] flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5 text-[#b8325a]" />
+                        <span>{notice.deadline.split(',')[0]}</span>
                       </span>
+                    ) : (
+                      <span className="text-xs text-[#8c6d7a]">Routine circular</span>
                     )}
+
+                    <span className="text-xs font-semibold text-[#8c2444] group-hover:text-[#6e132e] flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                      <span>View Dossier</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </span>
                   </div>
                 </div>
               </div>

@@ -1,84 +1,139 @@
 import React, { useState } from 'react';
-import { Search, BookOpen, Lightbulb, GraduationCap } from 'lucide-react';
+import { Search, BookOpen, Lightbulb, GraduationCap, Compass, HelpCircle } from 'lucide-react';
 import { JARGON_GLOSSARY } from '../data/sampleNotices';
+
+const CATEGORIES = [
+  'All Concepts',
+  'Exams & Attendance',
+  'Administration & Officers',
+  'Documents & Attestation',
+  'Hostel & Life',
+];
 
 export const GlossaryView: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeCategory, setActiveCategory] = useState('All Concepts');
 
-  const filteredItems = JARGON_GLOSSARY.filter(
-    (item) =>
+  const filteredItems = JARGON_GLOSSARY.filter((item) => {
+    const matchesSearch =
       item.term.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.definition.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.tipForFreshers.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+      item.tipForFreshers.toLowerCase().includes(searchTerm.toLowerCase());
+
+    if (!matchesSearch) return false;
+    if (activeCategory === 'All Concepts') return true;
+    if (activeCategory === 'Exams & Attendance') {
+      return ['condonation', 'debarment', 'sessional', 'backlog'].some((t) =>
+        item.term.toLowerCase().includes(t)
+      );
+    }
+    if (activeCategory === 'Administration & Officers') {
+      return ['dsw', 'proctor', 'dean', 'hod', 'controller'].some((t) =>
+        item.term.toLowerCase().includes(t)
+      );
+    }
+    if (activeCategory === 'Documents & Attestation') {
+      return ['self-attestation', 'affidavit', 'migration', 'bonafide', 'transcript'].some((t) =>
+        item.term.toLowerCase().includes(t)
+      );
+    }
+    if (activeCategory === 'Hostel & Life') {
+      return ['warden', 'mess', 'curfew', 'outpass', 'caretaker'].some((t) =>
+        item.term.toLowerCase().includes(t)
+      );
+    }
+    return true;
+  });
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 py-4">
+    <div className="space-y-8 pb-16">
       {/* Header */}
-      <div className="text-center space-y-3">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-pink-100 border border-pink-200 text-pink-900 text-xs font-semibold">
-          <BookOpen className="w-3.5 h-3.5 text-pink-700" />
-          <span>Campus Glossary</span>
+      <div className="border-b border-[#ebd2db] pb-5">
+        <div className="flex items-center gap-2 mb-1.5">
+          <span className="w-2 h-2 rounded-full bg-[#b8325a]" />
+          <span className="font-mono text-[11px] uppercase tracking-widest text-[#8c3b53] font-semibold">
+            The Fresher Lexicon
+          </span>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
-          Decoded University Jargon & Rules
+        <h1 className="font-serif-heading text-2xl sm:text-3xl lg:text-4xl font-bold text-[#26141c]">
+          Decoded Campus Jargon
         </h1>
-        <p className="text-sm text-slate-600 max-w-xl mx-auto">
-          Confusing acronyms, administrative titles, and attendance terms explained in simple English for freshers.
+        <p className="text-sm text-[#6e505d] mt-1.5 max-w-2xl leading-relaxed">
+          The unwritten translations of bureaucratic college vocabulary. What professors and circulars call “Condonation Petition”, “Debarment”, and “Proctorial Inquest” — explained in simple student English.
         </p>
       </div>
 
-      {/* Search Input - Pink Box */}
-      <div className="bg-pink-50 rounded-2xl border border-pink-200 p-5 sm:p-6 shadow-sm">
+      {/* Search & Filter bar */}
+      <div className="bg-white rounded-xl border border-[#ebd0d9] p-4 shadow-paper space-y-3">
         <div className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#967583] absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search terms like ERP, DSW, Condonation, Debarment, Self-Attestation..."
-            className="w-full bg-white border border-pink-200 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-pink-500"
+            placeholder="Search campus terms (e.g. Condonation, Debarment, Self-Attestation, DSW)..."
+            className="w-full bg-[#fdfafb] border border-[#edd2db] rounded-lg pl-10 pr-4 py-2 text-xs sm:text-sm text-[#24131a] placeholder:text-[#997c88] focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#b8325a]"
           />
+        </div>
+
+        {/* Categories */}
+        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pt-0.5">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => setActiveCategory(cat)}
+              className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all whitespace-nowrap cursor-pointer ${
+                activeCategory === cat
+                  ? 'bg-[#8c2444] text-white border-[#8c2444] shadow-button-press'
+                  : 'bg-[#fdf6f8] text-[#634854] border-[#ebd4dc] hover:bg-[#faebf0]'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Glossary Cards List with spacious breathing room */}
+      {/* Glossary List */}
       {filteredItems.length === 0 ? (
-        <div className="bg-pink-50 rounded-2xl border border-pink-200 p-12 text-center space-y-2">
-          <GraduationCap className="w-8 h-8 text-pink-400 mx-auto" />
-          <h3 className="text-sm font-bold text-slate-800">No terms match your search</h3>
-          <p className="text-xs text-slate-500">
-            Try searching for common terms like ERP, DSW, or Attestation.
+        <div className="bg-white rounded-xl border border-dashed border-[#e6c7d2] p-12 text-center space-y-3">
+          <BookOpen className="w-10 h-10 text-[#d49faa] mx-auto" />
+          <h3 className="font-serif-heading text-lg font-bold text-[#26141c]">Term not found</h3>
+          <p className="text-xs text-[#6e505d] max-w-sm mx-auto">
+            We haven’t indexed this term yet. Ask the Senior Desk on any notice dossier to get a custom breakdown.
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {filteredItems.map((item, index) => (
             <div
               key={index}
-              className="bg-pink-50 rounded-2xl border border-pink-200 p-6 sm:p-7 space-y-3 shadow-sm hover:border-pink-300 transition-colors"
+              className="bg-white rounded-xl border border-[#ebd0d9] p-5 sm:p-6 shadow-paper hover:border-[#b8325a] hover:shadow-paper-hover transition-all flex flex-col justify-between space-y-4"
             >
-              <div className="flex items-center justify-between">
-                <h3 className="text-base sm:text-lg font-bold text-slate-900">
-                  {item.term}
-                </h3>
-                <span className="text-[11px] font-semibold text-pink-900 bg-pink-100 border border-pink-200 px-2.5 py-0.5 rounded-full">
-                  Campus Concept
-                </span>
+              <div className="space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="font-serif-heading text-lg font-bold text-[#24131a]">
+                    {item.term}
+                  </h3>
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#8c384e] bg-[#fcedf1] px-2 py-0.5 rounded border border-[#f2d0db]">
+                    Campus Jargon
+                  </span>
+                </div>
+
+                <p className="text-xs sm:text-sm text-[#543b47] leading-relaxed">
+                  {item.definition}
+                </p>
               </div>
 
-              <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-                {item.definition}
-              </p>
-
               {item.tipForFreshers && (
-                <div className="mt-3 p-3.5 rounded-xl bg-white border border-pink-200 flex items-start gap-2.5">
-                  <Lightbulb className="w-4 h-4 text-pink-600 shrink-0 mt-0.5" />
-                  <div className="space-y-0.5">
-                    <span className="text-[11px] font-bold text-pink-900 uppercase tracking-wider block">
-                      Fresher Survival Tip:
+                <div className="pt-3 border-t border-[#f2dde4]">
+                  <div className="p-3 rounded-lg bg-[#fff8fa] border border-[#ebd4dc] space-y-1">
+                    <span className="font-mono text-[10px] font-bold text-[#8c2444] uppercase tracking-wider flex items-center gap-1">
+                      <Lightbulb className="w-3.5 h-3.5 text-[#b8325a]" />
+                      <span>Senior Pro-Tip</span>
                     </span>
-                    <p className="text-xs text-slate-600 leading-relaxed">
+                    <p className="text-xs text-[#614552] leading-relaxed">
                       {item.tipForFreshers}
                     </p>
                   </div>
