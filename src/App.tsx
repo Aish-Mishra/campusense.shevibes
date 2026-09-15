@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Navigation, AppPage } from './components/Navigation';
 import { SimplifyView } from './components/SimplifyView';
 import { NoticeDetailsView } from './components/NoticeDetailsView';
@@ -60,6 +61,30 @@ export default function App() {
     }
     return true;
   });
+
+  const [pinnedNoticeIds, setPinnedNoticeIds] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('campussense_pinned_ids');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error(e);
+    }
+    return ['notice-doc-verification', 'notice-scholarship'];
+  });
+
+  const handleTogglePin = (noticeId: string) => {
+    setPinnedNoticeIds((prev) => {
+      const updated = prev.includes(noticeId)
+        ? prev.filter((id) => id !== noticeId)
+        : [...prev, noticeId];
+      try {
+        localStorage.setItem('campussense_pinned_ids', JSON.stringify(updated));
+      } catch (e) {
+        console.error(e);
+      }
+      return updated;
+    });
+  };
 
   const [activeNotice, setActiveNotice] = useState<ClarifiedNotice>(
     () => notices[0] || INITIAL_SAMPLE_NOTICES[0]
@@ -256,68 +281,82 @@ export default function App() {
 
       {/* Main Content Canvas */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-8 py-6 sm:py-9">
-        {currentPage === 'login' && (
-          <LoginView
-            onLogin={handleLogin}
-            onContinueAsGuest={() => {
-              setIsLoggedIn(false);
-              setCurrentPage('board');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            currentProfile={profile}
-          />
-        )}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentPage}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
+          >
+            {currentPage === 'login' && (
+              <LoginView
+                onLogin={handleLogin}
+                onContinueAsGuest={() => {
+                  setIsLoggedIn(false);
+                  setCurrentPage('board');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                currentProfile={profile}
+              />
+            )}
 
-        {currentPage === 'simplify' && (
-          <SimplifyView
-            inputText={inputText}
-            setInputText={setInputText}
-            onClarify={handleClarifyNotice}
-            isLoading={isLoading}
-            errorMsg={errorMsg}
-            profile={profile}
-            sourceType={sourceType}
-            setSourceType={setSourceType}
-          />
-        )}
+            {currentPage === 'simplify' && (
+              <SimplifyView
+                inputText={inputText}
+                setInputText={setInputText}
+                onClarify={handleClarifyNotice}
+                isLoading={isLoading}
+                errorMsg={errorMsg}
+                profile={profile}
+                sourceType={sourceType}
+                setSourceType={setSourceType}
+              />
+            )}
 
-        {currentPage === 'details' && (
-          <NoticeDetailsView
-            notice={activeNotice || notices[0]}
-            profile={profile}
-            onToggleStep={handleToggleStep}
-            onBackToBoard={() => setCurrentPage('board')}
-            onNewNotice={() => setCurrentPage('simplify')}
-            onAskQuestion={handleAskNoticeQuestion}
-            isSimpleMode={isSimpleMode}
-            onToggleSimpleMode={() => setIsSimpleMode((prev) => !prev)}
-          />
-        )}
+            {currentPage === 'details' && (
+              <NoticeDetailsView
+                notice={activeNotice || notices[0]}
+                profile={profile}
+                onToggleStep={handleToggleStep}
+                onBackToBoard={() => setCurrentPage('board')}
+                onNewNotice={() => setCurrentPage('simplify')}
+                onAskQuestion={handleAskNoticeQuestion}
+                isSimpleMode={isSimpleMode}
+                onToggleSimpleMode={() => setIsSimpleMode((prev) => !prev)}
+                isPinned={pinnedNoticeIds.includes((activeNotice || notices[0]).id)}
+                onTogglePin={() => handleTogglePin((activeNotice || notices[0]).id)}
+              />
+            )}
 
-        {currentPage === 'board' && (
-          <NoticeBoardView
-            notices={notices}
-            onSelectNotice={handleSelectNotice}
-            onNewNotice={() => setCurrentPage('simplify')}
-            isSimpleMode={isSimpleMode}
-            onToggleSimpleMode={() => setIsSimpleMode((prev) => !prev)}
-          />
-        )}
+            {currentPage === 'board' && (
+              <NoticeBoardView
+                notices={notices}
+                onSelectNotice={handleSelectNotice}
+                onNewNotice={() => setCurrentPage('simplify')}
+                isSimpleMode={isSimpleMode}
+                onToggleSimpleMode={() => setIsSimpleMode((prev) => !prev)}
+                pinnedNoticeIds={pinnedNoticeIds}
+                onTogglePin={handleTogglePin}
+              />
+            )}
 
-        {currentPage === 'glossary' && <GlossaryView />}
+            {currentPage === 'glossary' && <GlossaryView />}
 
-        {currentPage === 'profile' && (
-          <ProfileView
-            profile={profile}
-            onSaveProfile={handleSaveProfile}
-            onSwitchAccount={() => {
-              setCurrentPage('login');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            onLogout={handleLogout}
-            isLoggedIn={isLoggedIn}
-          />
-        )}
+            {currentPage === 'profile' && (
+              <ProfileView
+                profile={profile}
+                onSaveProfile={handleSaveProfile}
+                onSwitchAccount={() => {
+                  setCurrentPage('login');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                onLogout={handleLogout}
+                isLoggedIn={isLoggedIn}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       {/* Editorial Campus Footer */}

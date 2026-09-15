@@ -20,6 +20,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   const [formData, setFormData] = useState<FresherProfile>({ ...profile });
 
   const branches = [
+    'Computer Science & Artificial Intelligence / CSAI',
     'Computer Science & Engg (CSE)',
     'CSE - Artificial Intelligence',
     'Electronics & Communication (ECE)',
@@ -27,6 +28,22 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     'Mechanical Engineering',
     'Electrical Engineering',
   ];
+
+  const csaiSubjects = [
+    'Data Structures',
+    'Database Management Systems',
+    'Operating Systems',
+    'Computer Networks',
+    'Object Oriented Programming',
+    'Artificial Intelligence',
+    'Machine Learning',
+    'Deep Learning',
+    'Python Programming',
+  ];
+
+  const isCSAI =
+    formData.branch.includes('CSAI') ||
+    formData.branch.includes('Artificial Intelligence');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,16 +89,45 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
           {/* Branch */}
           <div>
             <label className="font-semibold text-slate-700 block mb-1">
-              Branch
+              Select Your Branch
             </label>
             <select
               value={formData.branch}
-              onChange={(e) => setFormData({ ...formData, branch: e.target.value })}
+              onChange={(e) => {
+                const newBranch = e.target.value;
+                setFormData({
+                  ...formData,
+                  branch: newBranch,
+                  subject:
+                    newBranch.includes('CSAI') || newBranch.includes('Artificial Intelligence')
+                      ? csaiSubjects[0]
+                      : formData.subject,
+                });
+              }}
               className="w-full bg-white border border-pink-200 rounded-lg px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-pink-600"
             >
               {branches.map((b) => (
                 <option key={b} value={b}>
                   {b}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Select Your Subject */}
+          <div>
+            <label className="font-semibold text-slate-700 block mb-1">
+              Select Your Subject
+            </label>
+            <select
+              value={formData.subject || ''}
+              onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+              className="w-full bg-white border border-pink-200 rounded-lg px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-pink-600"
+            >
+              <option value="">-- Select Your Subject --</option>
+              {(isCSAI ? csaiSubjects : csaiSubjects).map((s) => (
+                <option key={s} value={s}>
+                  {s}
                 </option>
               ))}
             </select>

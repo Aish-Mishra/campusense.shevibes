@@ -10,6 +10,65 @@ interface ProfileViewProps {
   isLoggedIn?: boolean;
 }
 
+const BRANCH_OPTIONS = [
+  'Computer Science & Artificial Intelligence / CSAI',
+  'Computer Science & Engineering (CSE)',
+  'Information Technology (IT)',
+  'Electronics & Communication (ECE)',
+  'Mechanical Engineering',
+  'Electrical Engineering',
+];
+
+const CSAI_SUBJECTS = [
+  'Data Structures',
+  'Database Management Systems',
+  'Operating Systems',
+  'Computer Networks',
+  'Object Oriented Programming',
+  'Artificial Intelligence',
+  'Machine Learning',
+  'Deep Learning',
+  'Python Programming',
+];
+
+const SUBJECTS_BY_BRANCH: Record<string, string[]> = {
+  'Computer Science & Artificial Intelligence / CSAI': CSAI_SUBJECTS,
+  'Computer Science & Engineering (CSE)': [
+    'Data Structures',
+    'Database Management Systems',
+    'Operating Systems',
+    'Computer Networks',
+    'Discrete Mathematics',
+    'Theory of Computation',
+  ],
+  'Information Technology (IT)': [
+    'Data Structures',
+    'Web Technologies',
+    'Software Engineering',
+    'Database Management Systems',
+    'Computer Networks',
+  ],
+  'Electronics & Communication (ECE)': [
+    'Digital Electronics',
+    'Signals and Systems',
+    'Microprocessors',
+    'Analog Circuits',
+    'Electromagnetic Fields',
+  ],
+  'Mechanical Engineering': [
+    'Thermodynamics',
+    'Fluid Mechanics',
+    'Strength of Materials',
+    'Kinematics of Machinery',
+  ],
+  'Electrical Engineering': [
+    'Circuit Analysis',
+    'Power Systems',
+    'Control Systems',
+    'Electrical Machines',
+  ],
+};
+
 export const ProfileView: React.FC<ProfileViewProps> = ({
   profile,
   onSaveProfile,
@@ -19,6 +78,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 }) => {
   const [formData, setFormData] = useState<FresherProfile>(profile);
   const [isSaved, setIsSaved] = useState(false);
+
+  const currentSubjects =
+    SUBJECTS_BY_BRANCH[formData.branch] ||
+    (formData.branch?.includes('CSAI') || formData.branch?.includes('Artificial Intelligence')
+      ? CSAI_SUBJECTS
+      : CSAI_SUBJECTS);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +116,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               {formData.name || 'Student Name'}
             </h2>
             <p className="text-xs text-[#8c2444] font-semibold">
-              {formData.branch || 'Branch'} • {formData.year}
+              {formData.branch || 'Branch'}{formData.subject ? ` • ${formData.subject}` : ''} • {formData.year}
             </p>
             <p className="text-xs text-[#6e505d] flex items-center gap-1">
               <Home className="w-3.5 h-3.5 text-[#b8325a]" />
@@ -158,16 +223,52 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
           <div className="space-y-1">
             <label className="text-xs font-bold text-[#3d2731] block">
-              Branch:
+              Select Your Branch:
             </label>
-            <input
-              type="text"
+            <select
               value={formData.branch}
-              onChange={(e) => setFormData({ ...formData, branch: e.target.value })}
-              placeholder="e.g. Computer Science (CSE)"
-              className="w-full bg-[#fdfafb] border border-[#edd2db] rounded-lg px-3.5 py-2 text-xs sm:text-sm text-[#26141c] focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#b8325a]"
-            />
+              onChange={(e) => {
+                const newBranch = e.target.value;
+                const subjects =
+                  SUBJECTS_BY_BRANCH[newBranch] ||
+                  (newBranch.includes('CSAI') || newBranch.includes('Artificial Intelligence')
+                    ? CSAI_SUBJECTS
+                    : CSAI_SUBJECTS);
+                setFormData({
+                  ...formData,
+                  branch: newBranch,
+                  subject: subjects[0] || '',
+                });
+              }}
+              className="w-full bg-[#fdfafb] border border-[#edd2db] rounded-lg px-3 py-2 text-xs sm:text-sm text-[#26141c] focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#b8325a] cursor-pointer"
+            >
+              <option value="">-- Select Your Branch --</option>
+              {BRANCH_OPTIONS.map((b) => (
+                <option key={b} value={b}>
+                  {b}
+                </option>
+              ))}
+            </select>
           </div>
+        </div>
+
+        {/* Select Your Subject */}
+        <div className="space-y-1">
+          <label className="text-xs font-bold text-[#3d2731] block">
+            Select Your Subject:
+          </label>
+          <select
+            value={formData.subject || ''}
+            onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+            className="w-full bg-[#fdfafb] border border-[#edd2db] rounded-lg px-3 py-2 text-xs sm:text-sm text-[#26141c] focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#b8325a] cursor-pointer"
+          >
+            <option value="">-- Select Your Subject --</option>
+            {currentSubjects.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Residence Status */}

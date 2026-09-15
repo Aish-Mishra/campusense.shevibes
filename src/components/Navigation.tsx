@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'motion/react';
 import {
   Sparkles,
   Layers,
@@ -135,28 +136,37 @@ export const Navigation: React.FC<NavigationProps> = ({
           </div>
         </div>
 
-        {/* Clean, Simple Tabs */}
-        <nav className="flex items-center gap-1 sm:gap-2 -mb-px overflow-x-auto scrollbar-none pt-1">
+        {/* Clean, Simple Tabs with Animated Transition */}
+        <nav className="flex items-center gap-1 sm:gap-2 -mb-px overflow-x-auto scrollbar-none pt-1 relative">
           {/* Notices Tab */}
           <button
             type="button"
             onClick={() => onNavigate('board')}
-            className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-all border-b-2 whitespace-nowrap cursor-pointer ${
+            className={`relative flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer rounded-t-lg ${
               currentPage === 'board'
-                ? 'border-[#b8325a] text-[#8c2444] bg-[#fff5f7] rounded-t-lg border-t border-x border-[#ecd4dc]'
-                : 'border-transparent text-[#6e535e] hover:text-[#2b1720] hover:bg-[#faeff2]/60 rounded-t-lg'
+                ? 'text-[#8c2444] bg-[#fff5f7]'
+                : 'text-[#6e535e] hover:text-[#2b1720] hover:bg-[#faeff2]/60'
             }`}
           >
-            <Layers className="w-4 h-4" />
-            <span>Notices</span>
-            <span
-              className={`font-mono text-[10px] px-1.5 py-0.2 rounded-full ${
-                currentPage === 'board'
-                  ? 'bg-[#b8325a] text-white'
-                  : 'bg-[#f0dce3] text-[#73505c]'
-              }`}
-            >
-              {totalNoticesCount}
+            {currentPage === 'board' && (
+              <motion.div
+                layoutId="activeNavTab"
+                className="absolute inset-0 border-t border-x border-[#ecd4dc] bg-[#fff5f7] rounded-t-lg border-b-2 border-b-[#b8325a]"
+                transition={{ type: 'spring', stiffness: 500, damping: 38 }}
+              />
+            )}
+            <span className="relative z-10 flex items-center gap-1.5 sm:gap-2">
+              <Layers className="w-4 h-4" />
+              <span>Notices</span>
+              <span
+                className={`font-mono text-[10px] px-1.5 py-0.2 rounded-full ${
+                  currentPage === 'board'
+                    ? 'bg-[#b8325a] text-white'
+                    : 'bg-[#f0dce3] text-[#73505c]'
+                }`}
+              >
+                {totalNoticesCount}
+              </span>
             </span>
           </button>
 
@@ -164,68 +174,104 @@ export const Navigation: React.FC<NavigationProps> = ({
           <button
             type="button"
             onClick={() => onNavigate('simplify')}
-            className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-all border-b-2 whitespace-nowrap cursor-pointer ${
+            className={`relative flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer rounded-t-lg ${
               currentPage === 'simplify'
-                ? 'border-[#b8325a] text-[#8c2444] bg-[#fff5f7] rounded-t-lg border-t border-x border-[#ecd4dc]'
-                : 'border-transparent text-[#6e535e] hover:text-[#2b1720] hover:bg-[#faeff2]/60 rounded-t-lg'
+                ? 'text-[#8c2444] bg-[#fff5f7]'
+                : 'text-[#6e535e] hover:text-[#2b1720] hover:bg-[#faeff2]/60'
             }`}
           >
-            <Sparkles className="w-4 h-4" />
-            <span>Explain a Notice</span>
+            {currentPage === 'simplify' && (
+              <motion.div
+                layoutId="activeNavTab"
+                className="absolute inset-0 border-t border-x border-[#ecd4dc] bg-[#fff5f7] rounded-t-lg border-b-2 border-b-[#b8325a]"
+                transition={{ type: 'spring', stiffness: 500, damping: 38 }}
+              />
+            )}
+            <span className="relative z-10 flex items-center gap-1.5 sm:gap-2">
+              <Sparkles className="w-4 h-4" />
+              <span>Explain a Notice</span>
+            </span>
           </button>
 
           {/* Notice Details Tab */}
           <button
             type="button"
             onClick={() => onNavigate('details')}
-            className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-all border-b-2 whitespace-nowrap cursor-pointer ${
+            className={`relative flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer rounded-t-lg ${
               currentPage === 'details'
-                ? 'border-[#b8325a] text-[#8c2444] bg-[#fff5f7] rounded-t-lg border-t border-x border-[#ecd4dc]'
-                : 'border-transparent text-[#6e535e] hover:text-[#2b1720] hover:bg-[#faeff2]/60 rounded-t-lg'
+                ? 'text-[#8c2444] bg-[#fff5f7]'
+                : 'text-[#6e535e] hover:text-[#2b1720] hover:bg-[#faeff2]/60'
             }`}
           >
-            <FileCheck2 className="w-4 h-4" />
-            <span>Notice Details</span>
-            {hasActiveNotice && (
-              <span className="w-2 h-2 rounded-full bg-[#b8325a]" />
+            {currentPage === 'details' && (
+              <motion.div
+                layoutId="activeNavTab"
+                className="absolute inset-0 border-t border-x border-[#ecd4dc] bg-[#fff5f7] rounded-t-lg border-b-2 border-b-[#b8325a]"
+                transition={{ type: 'spring', stiffness: 500, damping: 38 }}
+              />
             )}
+            <span className="relative z-10 flex items-center gap-1.5 sm:gap-2">
+              <FileCheck2 className="w-4 h-4" />
+              <span>Notice Details</span>
+              {hasActiveNotice && (
+                <span className="w-2 h-2 rounded-full bg-[#b8325a]" />
+              )}
+            </span>
           </button>
 
           {/* Campus Words Tab */}
           <button
             type="button"
             onClick={() => onNavigate('glossary')}
-            className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-all border-b-2 whitespace-nowrap cursor-pointer ${
+            className={`relative flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer rounded-t-lg ${
               currentPage === 'glossary'
-                ? 'border-[#b8325a] text-[#8c2444] bg-[#fff5f7] rounded-t-lg border-t border-x border-[#ecd4dc]'
-                : 'border-transparent text-[#6e535e] hover:text-[#2b1720] hover:bg-[#faeff2]/60 rounded-t-lg'
+                ? 'text-[#8c2444] bg-[#fff5f7]'
+                : 'text-[#6e535e] hover:text-[#2b1720] hover:bg-[#faeff2]/60'
             }`}
           >
-            <BookOpen className="w-4 h-4" />
-            <span>Campus Words</span>
+            {currentPage === 'glossary' && (
+              <motion.div
+                layoutId="activeNavTab"
+                className="absolute inset-0 border-t border-x border-[#ecd4dc] bg-[#fff5f7] rounded-t-lg border-b-2 border-b-[#b8325a]"
+                transition={{ type: 'spring', stiffness: 500, damping: 38 }}
+              />
+            )}
+            <span className="relative z-10 flex items-center gap-1.5 sm:gap-2">
+              <BookOpen className="w-4 h-4" />
+              <span>Campus Words</span>
+            </span>
           </button>
 
           {/* Profile or Login Tab */}
           <button
             type="button"
             onClick={() => onNavigate(isLoggedIn ? 'profile' : 'login')}
-            className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-all border-b-2 whitespace-nowrap cursor-pointer ${
+            className={`relative flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer rounded-t-lg ${
               currentPage === 'profile' || currentPage === 'login'
-                ? 'border-[#b8325a] text-[#8c2444] bg-[#fff5f7] rounded-t-lg border-t border-x border-[#ecd4dc]'
-                : 'border-transparent text-[#6e535e] hover:text-[#2b1720] hover:bg-[#faeff2]/60 rounded-t-lg'
+                ? 'text-[#8c2444] bg-[#fff5f7]'
+                : 'text-[#6e535e] hover:text-[#2b1720] hover:bg-[#faeff2]/60'
             }`}
           >
-            {isLoggedIn ? (
-              <>
-                <UserCheck className="w-4 h-4" />
-                <span>My Profile</span>
-              </>
-            ) : (
-              <>
-                <LogIn className="w-4 h-4" />
-                <span>Student Login</span>
-              </>
+            {(currentPage === 'profile' || currentPage === 'login') && (
+              <motion.div
+                layoutId="activeNavTab"
+                className="absolute inset-0 border-t border-x border-[#ecd4dc] bg-[#fff5f7] rounded-t-lg border-b-2 border-b-[#b8325a]"
+                transition={{ type: 'spring', stiffness: 500, damping: 38 }}
+              />
             )}
+            <span className="relative z-10 flex items-center gap-1.5 sm:gap-2">
+              {isLoggedIn ? (
+                <>
+                  <UserCheck className="w-4 h-4" />
+                  <span>My Profile</span>
+                </>
+              ) : (
+                <>
+                  <LogIn className="w-4 h-4" />
+                  <span>Student Login</span>
+                </>
+              )}
+            </span>
           </button>
         </nav>
       </div>

@@ -42,12 +42,14 @@ export interface ClarifiedNotice {
   rawContent: string;
   tags: string[];
   userCompletedSteps?: number[]; // list of step order numbers completed
+  isPinned?: boolean; // Pinterest board pinned state
 }
 
 export interface FresherProfile {
   name: string;
   year: string;
   branch: string;
+  subject?: string;
   residence: 'Hosteler' | 'Day Scholar';
   category: string;
   collegeName: string;

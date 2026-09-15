@@ -19,6 +19,7 @@ import {
   FileText,
   HelpCircle,
   Building,
+  Pin,
 } from 'lucide-react';
 import { ClarifiedNotice, FresherProfile } from '../types';
 
@@ -31,6 +32,8 @@ interface NoticeDetailsViewProps {
   onAskQuestion: (question: string) => Promise<string>;
   isSimpleMode: boolean;
   onToggleSimpleMode: () => void;
+  isPinned?: boolean;
+  onTogglePin?: () => void;
 }
 
 export const NoticeDetailsView: React.FC<NoticeDetailsViewProps> = ({
@@ -42,6 +45,8 @@ export const NoticeDetailsView: React.FC<NoticeDetailsViewProps> = ({
   onAskQuestion,
   isSimpleMode,
   onToggleSimpleMode,
+  isPinned,
+  onTogglePin,
 }) => {
   const [copiedWhatsapp, setCopiedWhatsapp] = useState(false);
   const [userQuestion, setUserQuestion] = useState('');
@@ -111,6 +116,23 @@ export const NoticeDetailsView: React.FC<NoticeDetailsViewProps> = ({
 
         {/* Buttons for reducing complexity */}
         <div className="flex items-center gap-2">
+          {/* Pinterest Pin Button */}
+          {onTogglePin && (
+            <button
+              type="button"
+              onClick={onTogglePin}
+              className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer ${
+                isPinned
+                  ? 'bg-[#ffebee] text-[#991b3e] border-[#f8bbd0] shadow-sm'
+                  : 'bg-white text-[#6b4c59] border-[#ebd0d9] hover:bg-[#fff0f4]'
+              }`}
+              title={isPinned ? 'Remove from My Pinboard' : 'Pin to My Pinboard'}
+            >
+              <Pin className={`w-3.5 h-3.5 ${isPinned ? 'fill-[#b8325a] text-[#b8325a]' : 'text-[#8c2444]'}`} />
+              <span>{isPinned ? 'Pinned to Board' : 'Pin Notice'}</span>
+            </button>
+          )}
+
           {/* Simple Mode Switch */}
           <button
             type="button"
