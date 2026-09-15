@@ -51,4 +51,6 @@ export interface FresherProfile {
   residence: 'Hosteler' | 'Day Scholar';
   category: string;
   collegeName: string;
+  rollNumber?: string;
+  email?: string;
 }

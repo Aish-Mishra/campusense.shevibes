@@ -5,6 +5,7 @@ import { NoticeDetailsView } from './components/NoticeDetailsView';
 import { NoticeBoardView } from './components/NoticeBoardView';
 import { GlossaryView } from './components/GlossaryView';
 import { ProfileView } from './components/ProfileView';
+import { LoginView } from './components/LoginView';
 import { ClarifiedNotice, FresherProfile, NoticeCategory, SourceType } from './types';
 import { INITIAL_SAMPLE_NOTICES } from './data/sampleNotices';
 
@@ -40,6 +41,26 @@ export default function App() {
     return DEFAULT_PROFILE;
   });
 
+  const [isSimpleMode, setIsSimpleMode] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('campussense_simple_mode');
+      if (saved !== null) return JSON.parse(saved);
+    } catch (e) {
+      console.error(e);
+    }
+    return true; // Default to Simple Mode to prevent data overload
+  });
+
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('campussense_is_logged_in');
+      if (saved !== null) return JSON.parse(saved);
+    } catch (e) {
+      console.error(e);
+    }
+    return true;
+  });
+
   const [activeNotice, setActiveNotice] = useState<ClarifiedNotice>(
     () => notices[0] || INITIAL_SAMPLE_NOTICES[0]
   );
@@ -63,6 +84,35 @@ export default function App() {
       console.error(e);
     }
   }, [profile]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('campussense_simple_mode', JSON.stringify(isSimpleMode));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [isSimpleMode]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('campussense_is_logged_in', JSON.stringify(isLoggedIn));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [isLoggedIn]);
+
+  const handleLogin = (newProfile: FresherProfile) => {
+    setProfile(newProfile);
+    setIsLoggedIn(true);
+    setCurrentPage('board');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setCurrentPage('login');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleToggleStep = (noticeId: string, stepOrder: number) => {
     setNotices((prevNotices) =>
@@ -197,12 +247,27 @@ export default function App() {
         }}
         profile={profile}
         hasActiveNotice={Boolean(activeNotice)}
-        activeNoticeTitle={activeNotice?.title}
         totalNoticesCount={notices.length}
+        isSimpleMode={isSimpleMode}
+        onToggleSimpleMode={() => setIsSimpleMode((prev) => !prev)}
+        isLoggedIn={isLoggedIn}
+        onLogout={handleLogout}
       />
 
       {/* Main Content Canvas */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-8 py-6 sm:py-9">
+        {currentPage === 'login' && (
+          <LoginView
+            onLogin={handleLogin}
+            onContinueAsGuest={() => {
+              setIsLoggedIn(false);
+              setCurrentPage('board');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            currentProfile={profile}
+          />
+        )}
+
         {currentPage === 'simplify' && (
           <SimplifyView
             inputText={inputText}
@@ -224,6 +289,8 @@ export default function App() {
             onBackToBoard={() => setCurrentPage('board')}
             onNewNotice={() => setCurrentPage('simplify')}
             onAskQuestion={handleAskNoticeQuestion}
+            isSimpleMode={isSimpleMode}
+            onToggleSimpleMode={() => setIsSimpleMode((prev) => !prev)}
           />
         )}
 
@@ -232,13 +299,24 @@ export default function App() {
             notices={notices}
             onSelectNotice={handleSelectNotice}
             onNewNotice={() => setCurrentPage('simplify')}
+            isSimpleMode={isSimpleMode}
+            onToggleSimpleMode={() => setIsSimpleMode((prev) => !prev)}
           />
         )}
 
         {currentPage === 'glossary' && <GlossaryView />}
 
         {currentPage === 'profile' && (
-          <ProfileView profile={profile} onSaveProfile={handleSaveProfile} />
+          <ProfileView
+            profile={profile}
+            onSaveProfile={handleSaveProfile}
+            onSwitchAccount={() => {
+              setCurrentPage('login');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onLogout={handleLogout}
+            isLoggedIn={isLoggedIn}
+          />
         )}
       </main>
 
@@ -251,16 +329,16 @@ export default function App() {
                 CampuSense
               </span>
               <span className="text-[#ebd0d8]">•</span>
-              <span className="font-mono text-[10px] text-[#8c3b53] uppercase tracking-wider">
-                Fresher Bulletin & Circular Dossier
+              <span className="text-[11px] text-[#8c3b53] font-medium">
+                College Notices in Plain English
               </span>
             </div>
             <p className="text-[11px] text-[#8c6b78] max-w-lg">
-              Independent student-to-student notice decoder. Always verify physical certificate requirements at your college admin block window before deadline cutoffs.
+              Demystifying confusing university circulars, room locations, and document checklists for freshers.
             </p>
           </div>
 
-          <div className="flex items-center gap-4 text-[11px] font-medium text-[#8c2444]">
+          <div className="flex items-center gap-4 text-[11px] font-semibold text-[#8c2444]">
             <button
               type="button"
               onClick={() => {
@@ -269,7 +347,18 @@ export default function App() {
               }}
               className="hover:underline cursor-pointer"
             >
-              Notice Board
+              Notices
+            </button>
+            <span className="text-[#ecd6dd]">•</span>
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentPage('simplify');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="hover:underline cursor-pointer"
+            >
+              Explain a Notice
             </button>
             <span className="text-[#ecd6dd]">•</span>
             <button
@@ -280,7 +369,7 @@ export default function App() {
               }}
               className="hover:underline cursor-pointer"
             >
-              Lexicon
+              Campus Words
             </button>
             <span className="text-[#ecd6dd]">•</span>
             <button
@@ -291,7 +380,7 @@ export default function App() {
               }}
               className="hover:underline cursor-pointer"
             >
-              Student Card
+              My Profile
             </button>
           </div>
         </div>
