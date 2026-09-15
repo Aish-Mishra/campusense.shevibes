@@ -40,21 +40,58 @@ export const NoticeBoardView: React.FC<NoticeBoardViewProps> = ({
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const filteredNotices = notices.filter((notice) => {
-    if (selectedFilter === 'urgent' && notice.urgency !== 'CRITICAL') return false;
-    if (selectedFilter === 'academic' && notice.category !== 'academic') return false;
-    if (selectedFilter === 'exams' && notice.category !== 'exams') return false;
-    if (selectedFilter === 'hostel' && notice.category !== 'hostel') return false;
+  // First apply category/urgency filters
+  if (selectedFilter === 'urgent' && notice.urgency !== 'CRITICAL') return false;
+  if (selectedFilter === 'academic' && notice.category !== 'academic') return false;
+  if (selectedFilter === 'exams' && notice.category !== 'exams') return false;
+  if (selectedFilter === 'hostel' && notice.category !== 'hostel') return false;
 
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      notice.title.toLowerCase().includes(q) ||
-      notice.tldr.toLowerCase().includes(q) ||
-      notice.contactOrOffice.toLowerCase().includes(q) ||
-      (notice.department && notice.department.toLowerCase().includes(q))
-    );
-  });
+  // If there is no search query, show the notice
+  if (!searchQuery.trim()) return true;
 
+  const q = searchQuery.trim().toLowerCase();
+
+  // Search across the complete notice
+  const searchableText = [
+    notice.title,
+    notice.department,
+    notice.tldr,
+    notice.deadline,
+    notice.contactOrOffice,
+    notice.consequencesIfMissed,
+    notice.whatsappSummary,
+    notice.rawContent,
+    notice.category,
+    notice.urgency,
+
+    // Search "Who needs to act"
+    notice.whoNeedsToAct?.appliesTo,
+    notice.whoNeedsToAct?.exempt,
+
+    // Search action steps
+    ...(notice.actionSteps || []).flatMap((step) => [
+      step.title,
+      step.description,
+      step.location,
+      ...(step.itemsToBring || []),
+    ]),
+
+    // Search decoded campus jargon
+    ...(notice.jargonDecoded || []).flatMap((item) => [
+      item.term,
+      item.explanation,
+    ]),
+
+    // Search tags
+    ...(notice.tags || []),
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+
+  return searchableText.includes(q);
+});
+   
   return (
     <div className="space-y-6 pb-12">
       {/* Friendly Page Header */}
