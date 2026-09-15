@@ -65,12 +65,34 @@ export default function App() {
   const [pinnedNoticeIds, setPinnedNoticeIds] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('campussense_pinned_ids');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((id) =>
+            INITIAL_SAMPLE_NOTICES.some((n) => n.id === id)
+          );
+        }
+      }
     } catch (e) {
       console.error(e);
     }
-    return ['notice-doc-verification', 'notice-scholarship'];
+    return ['notice-doc-verification'];
   });
+
+  // Keep pinnedNoticeIds strictly in sync with valid existing notices
+  useEffect(() => {
+    const validIds = pinnedNoticeIds.filter((id) =>
+      notices.some((n) => n.id === id)
+    );
+    if (validIds.length !== pinnedNoticeIds.length) {
+      setPinnedNoticeIds(validIds);
+      try {
+        localStorage.setItem('campussense_pinned_ids', JSON.stringify(validIds));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, [notices, pinnedNoticeIds]);
 
   const handleTogglePin = (noticeId: string) => {
     setPinnedNoticeIds((prev) => {
@@ -232,25 +254,6 @@ export default function App() {
     }
   };
 
-  const handleAskNoticeQuestion = async (question: string): Promise<string> => {
-    const res = await fetch('/api/ask-notice', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        question,
-        noticeText: activeNotice?.rawContent || '',
-        noticeSummary: activeNotice,
-        studentContext: profile,
-      }),
-    });
-
-    if (!res.ok) {
-      throw new Error('Failed to ask question');
-    }
-    const data = await res.json();
-    return data.answer || 'Please contact your Class Representative or Academic Office.';
-  };
-
   const handleSelectNotice = (notice: ClarifiedNotice) => {
     setActiveNotice(notice);
     setCurrentPage('details');
@@ -321,7 +324,6 @@ export default function App() {
                 onToggleStep={handleToggleStep}
                 onBackToBoard={() => setCurrentPage('board')}
                 onNewNotice={() => setCurrentPage('simplify')}
-                onAskQuestion={handleAskNoticeQuestion}
                 isSimpleMode={isSimpleMode}
                 onToggleSimpleMode={() => setIsSimpleMode((prev) => !prev)}
                 isPinned={pinnedNoticeIds.includes((activeNotice || notices[0]).id)}

@@ -86,12 +86,15 @@ export const NoticeBoardView: React.FC<NoticeBoardViewProps> = ({
     }
   };
 
+  // Only count pinned notices that actually exist in the current notices list
+  const validPinnedCount = notices.filter((n) => pinnedNoticeIds.includes(n.id)).length;
+
   const quickFilters = [
     { id: 'all', label: 'All Notices' },
     {
       id: 'pinned',
-      label: `📌 My Pinboard (${pinnedNoticeIds.length})`,
-      highlight: pinnedNoticeIds.length > 0,
+      label: `📌 My Pinboard (${validPinnedCount})`,
+      highlight: validPinnedCount > 0,
     },
     { id: 'urgent', label: '🚨 Urgent Only' },
     { id: 'academic', label: '📄 Certificates & Docs' },
@@ -151,15 +154,9 @@ export const NoticeBoardView: React.FC<NoticeBoardViewProps> = ({
       {/* Friendly Page Header & Board Switcher */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#ebd2db] pb-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="font-serif-heading text-2xl sm:text-3xl font-bold text-[#26141c]">
-              College Notices & Pinboard
-            </h1>
-            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[#faebef] text-[#992244] border border-[#f2d0db] flex items-center gap-1">
-              <span>✨</span>
-              <span>Pinterest Mood</span>
-            </span>
-          </div>
+          <h1 className="font-serif-heading text-2xl sm:text-3xl font-bold text-[#26141c]">
+            College Notices & Pinboard
+          </h1>
           <p className="text-xs sm:text-sm text-[#6e505d] mt-1">
             Curate what’s important, pin campus circulars to your desk, and see deadlines in plain English.
           </p>
@@ -177,7 +174,7 @@ export const NoticeBoardView: React.FC<NoticeBoardViewProps> = ({
                   ? 'bg-white text-[#8c2444] shadow-xs'
                   : 'text-[#6e505d] hover:text-[#2b1720]'
               }`}
-              title="Aesthetic Pinterest Moodboard layout"
+              title="Pinboard layout"
             >
               <Pin className="w-3.5 h-3.5 fill-[#8c2444] text-[#8c2444]" />
               <span>Pinboard</span>
@@ -243,14 +240,14 @@ export const NoticeBoardView: React.FC<NoticeBoardViewProps> = ({
               📌
             </span>
             <span className="font-serif-heading font-bold text-sm sm:text-base text-[#2b1720]">
-              Campus Moodboard & Fresher Sticky Notes
+              Campus Pinboard & Quick Notes
             </span>
           </div>
           <div className="flex items-center gap-2 text-xs text-[#8c6b78]">
             <span className="hidden sm:inline">Click 📌 on any card to pin it to your board</span>
-            {pinnedNoticeIds.length > 0 && (
+            {validPinnedCount > 0 && (
               <span className="font-semibold text-[#8c2444] bg-[#ffebee] px-2 py-0.5 rounded-full border border-[#f8bbd0]">
-                {pinnedNoticeIds.length} Pinned
+                {validPinnedCount} Pinned
               </span>
             )}
           </div>

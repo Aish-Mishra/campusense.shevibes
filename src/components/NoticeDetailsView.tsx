@@ -29,7 +29,6 @@ interface NoticeDetailsViewProps {
   onToggleStep: (noticeId: string, stepOrder: number) => void;
   onBackToBoard: () => void;
   onNewNotice: () => void;
-  onAskQuestion: (question: string) => Promise<string>;
   isSimpleMode: boolean;
   onToggleSimpleMode: () => void;
   isPinned?: boolean;
@@ -42,21 +41,16 @@ export const NoticeDetailsView: React.FC<NoticeDetailsViewProps> = ({
   onToggleStep,
   onBackToBoard,
   onNewNotice,
-  onAskQuestion,
   isSimpleMode,
   onToggleSimpleMode,
   isPinned,
   onTogglePin,
 }) => {
   const [copiedWhatsapp, setCopiedWhatsapp] = useState(false);
-  const [userQuestion, setUserQuestion] = useState('');
-  const [qaHistory, setQaHistory] = useState<Array<{ q: string; a: string }>>([]);
-  const [isAsking, setIsAsking] = useState(false);
 
   // Collapsible section toggles for reducing complexity
   const [showJargon, setShowJargon] = useState(!isSimpleMode);
   const [showOfficeDetails, setShowOfficeDetails] = useState(!isSimpleMode);
-  const [showAskDesk, setShowAskDesk] = useState(false);
   const [showFullNoticeText, setShowFullNoticeText] = useState(false);
 
   const completedSteps = notice.userCompletedSteps || [];
@@ -76,28 +70,6 @@ export const NoticeDetailsView: React.FC<NoticeDetailsViewProps> = ({
       setTimeout(() => setCopiedWhatsapp(false), 2500);
     } catch (e) {
       console.error(e);
-    }
-  };
-
-  const handleSendQuestion = async (customQ?: string) => {
-    const q = (customQ || userQuestion).trim();
-    if (!q || isAsking) return;
-
-    setIsAsking(true);
-    setUserQuestion('');
-    try {
-      const ans = await onAskQuestion(q);
-      setQaHistory((prev) => [...prev, { q, a: ans }]);
-    } catch (err: any) {
-      setQaHistory((prev) => [
-        ...prev,
-        {
-          q,
-          a: 'Could not connect right now. General rule: Always carry 2 self-attested photocopies of your original documents to the admin window.',
-        },
-      ]);
-    } finally {
-      setIsAsking(false);
     }
   };
 
@@ -448,73 +420,7 @@ export const NoticeDetailsView: React.FC<NoticeDetailsViewProps> = ({
           )}
         </div>
 
-        {/* Toggle 3: Ask a question about this notice */}
-        <div className="bg-white rounded-xl border border-[#ebd0d9] shadow-paper overflow-hidden">
-          <button
-            type="button"
-            onClick={() => setShowAskDesk(!showAskDesk)}
-            className="w-full p-4 flex items-center justify-between text-left hover:bg-[#fffafb] cursor-pointer"
-          >
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#b8325a]" />
-              <span className="text-sm font-bold text-[#24131a]">
-                Have a question about this notice? (Ask Senior)
-              </span>
-            </div>
-            <div className="flex items-center gap-1 text-xs font-semibold text-[#8c2444]">
-              <span>{showAskDesk ? 'Close' : 'Ask question'}</span>
-              {showAskDesk ? (
-                <ChevronUp className="w-4 h-4" />
-              ) : (
-                <ChevronDown className="w-4 h-4" />
-              )}
-            </div>
-          </button>
-
-          {showAskDesk && (
-            <div className="p-4 pt-0 border-t border-[#f3dde3] space-y-3 mt-3">
-              {/* Chat History */}
-              {qaHistory.length > 0 && (
-                <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {qaHistory.map((item, idx) => (
-                    <div key={idx} className="space-y-1 text-xs">
-                      <div className="bg-[#fcedf1] p-2 rounded text-[#73263c] font-medium">
-                        <strong>You:</strong> {item.q}
-                      </div>
-                      <div className="bg-[#fff9fa] p-2 rounded text-[#3b242e] border border-[#ebd2dc]">
-                        <strong>Answer:</strong> {item.a}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Input */}
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={userQuestion}
-                  onChange={(e) => setUserQuestion(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleSendQuestion();
-                  }}
-                  placeholder="e.g. Can I submit a DigiLocker printout?"
-                  className="flex-1 bg-[#fdfafb] border border-[#edd2db] rounded-lg px-3 py-2 text-xs text-[#24131a] focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#b8325a]"
-                />
-                <button
-                  type="button"
-                  onClick={() => handleSendQuestion()}
-                  disabled={isAsking || !userQuestion.trim()}
-                  className="px-3 py-2 bg-[#b8325a] hover:bg-[#a12448] disabled:opacity-50 text-white rounded-lg text-xs font-semibold cursor-pointer"
-                >
-                  {isAsking ? '...' : 'Ask'}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Toggle 4: Original raw notice text (hidden by default) */}
+        {/* Toggle 3: Original raw notice text (hidden by default) */}
         {notice.rawContent && (
           <div className="bg-white rounded-xl border border-[#ebd0d9] shadow-paper overflow-hidden">
             <button
