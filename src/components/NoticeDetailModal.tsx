@@ -12,6 +12,7 @@ import {
   Building,
 } from 'lucide-react';
 import { ClarifiedNotice, FresherProfile } from '../types';
+import { answerNoticeQuestionLocal } from '../../localNoticeParser';
 
 interface NoticeDetailModalProps {
   notice: ClarifiedNotice | null;
@@ -50,12 +51,39 @@ export const NoticeDetailModal: React.FC<NoticeDetailModalProps> = ({
     setUserQuestion('');
 
     try {
-      const res = await fetch('/api/ask-notice', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          noticeText: notice.rawContent,
-          noticeSummary: {
+      let answer = '';
+      try {
+        const res = await fetch('/api/ask-notice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            noticeText: notice.rawContent,
+            noticeSummary: {
+              title: notice.title,
+              department: notice.department,
+              deadline: notice.deadline,
+              tldr: notice.tldr,
+              whoNeedsToAct: notice.whoNeedsToAct,
+              actionSteps: notice.actionSteps,
+            },
+            question: q,
+            studentContext: profile,
+          }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          answer = data.answer || '';
+        }
+      } catch (e) {
+        console.warn('API question answer fallback triggered:', e);
+      }
+
+      if (!answer) {
+        answer = answerNoticeQuestionLocal(
+          q,
+          notice.rawContent,
+          {
             title: notice.title,
             department: notice.department,
             deadline: notice.deadline,
@@ -63,19 +91,18 @@ export const NoticeDetailModal: React.FC<NoticeDetailModalProps> = ({
             whoNeedsToAct: notice.whoNeedsToAct,
             actionSteps: notice.actionSteps,
           },
-          question: q,
-          studentContext: profile,
-        }),
-      });
+          profile
+        );
+      }
 
-      const data = await res.json();
-      setQaHistory((prev) => [...prev, { q, a: data.answer || 'No answer available.' }]);
+      setQaHistory((prev) => [...prev, { q, a: answer }]);
     } catch (err) {
+      const fallbackAns = answerNoticeQuestionLocal(q, notice.rawContent, notice, profile);
       setQaHistory((prev) => [
         ...prev,
         {
           q,
-          a: 'Could not connect to AI assistant. Please confirm with your class representative or department office.',
+          a: fallbackAns || 'Please confirm with your department counter.',
         },
       ]);
     } finally {

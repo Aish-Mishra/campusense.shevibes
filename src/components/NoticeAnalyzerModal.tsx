@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Sparkles, AlertCircle } from 'lucide-react';
 import { ClarifiedNotice, FresherProfile, SourceType, NoticeCategory } from '../types';
+import { parseCampusNoticeLocal } from '../../localNoticeParser';
 
 interface NoticeAnalyzerModalProps {
   isOpen: boolean;
@@ -79,22 +80,29 @@ export const NoticeAnalyzerModal: React.FC<NoticeAnalyzerModalProps> = ({
     setErrorMsg(null);
 
     try {
-      const res = await fetch('/api/clarify-notice', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          rawText,
-          sourceType,
-          studentContext: profile,
-        }),
-      });
+      let data: any = null;
 
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to clarify notice.');
+      try {
+        const res = await fetch('/api/clarify-notice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            rawText,
+            sourceType,
+            studentContext: profile,
+          }),
+        });
+
+        if (res.ok) {
+          data = await res.json();
+        }
+      } catch (networkErr) {
+        console.warn('Backend API unavailable, using local campus decoder:', networkErr);
       }
 
-      const data = await res.json();
+      if (!data || !data.title) {
+        data = parseCampusNoticeLocal(rawText, sourceType, profile);
+      }
 
       let category: NoticeCategory = 'academic';
       const textLower = (data.title + ' ' + rawText).toLowerCase();
